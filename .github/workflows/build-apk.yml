@@ -1,10 +1,8 @@
 name: StudyLens
-
 on:
-workflow_dispatch:
-
+  workflow_dispatch:
 jobs:
-test:
-runs-on: ubuntu-latest
-steps:
-- run: echo "hello"
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "hello"
