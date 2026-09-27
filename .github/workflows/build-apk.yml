@@ -1,14 +1,8 @@
 name: StudyLens APK
-
-on:
-workflow_dispatch:
-
+on: workflow_dispatch
 jobs:
 build:
 runs-on: ubuntu-latest
 steps:
-- name: Checkout
-uses: actions/checkout@v4
-
-  - name: Test
-    run: echo "StudyLens build started"
+- uses: actions/checkout@v4
+- run: echo StudyLens-build-started
