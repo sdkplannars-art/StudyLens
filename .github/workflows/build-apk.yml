@@ -12,42 +12,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Find Android project
-        run: |
-          echo "Repository contents:"
-          find . -maxdepth 3 -type f \( \
-            -name "settings.gradle" -o \
-            -name "settings.gradle.kts" -o \
-            -name "build.gradle" -o \
-            -name "build.gradle.kts" \
-          \) -print
-
-      - name: Set up JDK
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Build APK
+      - name: Locate Android project
+        shell: bash
         run: |
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug
-          elif [ -f "./android/gradlew" ]; then
-            cd android
-            chmod +x ./gradlew
-            ./gradlew assembleDebug
+          echo "Searching for Gradle project..."
+
+          PROJECT_DIR=""
+
+          if [ -f "gradlew" ]; then
+            PROJECT_DIR="."
           else
-            echo "ERROR: No Gradle wrapper found."
-            echo "The Android project needs a gradlew file."
+            for dir in */; do
+              if [ -f "${dir}gradlew" ]; then
+                PROJECT_DIR="${dir%/}"
+                break
+              fi
+            done
+          fi
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "❌ No Gradle Android project found."
+            echo "The repository must contain gradlew."
+            echo ""
+            echo "Files in repository:"
+            find . -maxdepth 3 -type f | sort
             exit 1
           fi
 
+          echo "✅ Android project found at: $PROJECT_DIR"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Build Debug APK
+        shell: bash
+        run: |
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
       - name: Find APK
         run: |
+          echo "APK files:"
           find . -type f -name "*.apk" -print
 
       - name: Upload APK
@@ -55,4 +68,5 @@ jobs:
         with:
           name: StudyLens-debug-apk
           path: "**/*.apk"
+          if-no-files-found: error
 ```
