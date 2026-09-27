@@ -12,56 +12,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Locate Android project
-        shell: bash
+      - name: Check project
         run: |
-          echo "Searching for Gradle project..."
+          echo "Checking repository..."
+          find . -maxdepth 3 -type f | sort
 
-          PROJECT_DIR=""
-
-          if [ -f "gradlew" ]; then
-            PROJECT_DIR="."
+      - name: Build APK
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug
+          elif [ -f "./android/gradlew" ]; then
+            cd android
+            chmod +x ./gradlew
+            ./gradlew assembleDebug
           else
-            for dir in */; do
-              if [ -f "${dir}gradlew" ]; then
-                PROJECT_DIR="${dir%/}"
-                break
-              fi
-            done
-          fi
-
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "❌ No Gradle Android project found."
-            echo "The repository must contain gradlew."
-            echo ""
-            echo "Files in repository:"
-            find . -maxdepth 3 -type f | sort
+            echo "ERROR: gradlew was not found."
             exit 1
           fi
-
-          echo "✅ Android project found at: $PROJECT_DIR"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-
-      - name: Build Debug APK
-        shell: bash
-        run: |
-          cd "$PROJECT_DIR"
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
-
-      - name: Find APK
-        run: |
-          echo "APK files:"
-          find . -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
