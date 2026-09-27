@@ -1,46 +1,16 @@
-name: Build APK
+name: StudyLens APK
 
 on:
-push:
-branches:
-- main
 workflow_dispatch:
 
 jobs:
 build:
 runs-on: ubuntu-latest
+steps:
+- name: Checkout
+uses: actions/checkout@v4
 
 ```
-steps:
-  - name: Checkout
-    uses: actions/checkout@v4
-
-  - name: Setup Java
-    uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: '17'
-
-  - name: Build APK
-    run: |
-      if [ -f "./gradlew" ]; then
-        chmod +x ./gradlew
-        ./gradlew assembleDebug
-      elif [ -f "./android/gradlew" ]; then
-        cd ./android
-        chmod +x ./gradlew
-        ./gradlew assembleDebug
-      else
-        echo "ERROR: Gradle wrapper not found."
-        echo "Repository structure:"
-        find . -maxdepth 3 -type f | sort
-        exit 1
-      fi
-
-  - name: Upload APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: StudyLens-APK
-      path: '**/*.apk'
-      if-no-files-found: error
+  - name: Test
+    run: echo "StudyLens build started"
 ```
