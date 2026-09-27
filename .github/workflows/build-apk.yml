@@ -1,36 +1,36 @@
-```yaml
 name: Build APK
 
 on: [push, workflow_dispatch]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+```
+steps:
+  - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+  - uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
 
-      - name: Build
-        run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          elif [ -f android/gradlew ]; then
-            cd android
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          else
-            echo "No gradlew found"
-            exit 1
-          fi
+  - name: Build
+    run: |
+      if [ -f gradlew ]; then
+        chmod +x gradlew
+        ./gradlew assembleDebug
+      elif [ -f android/gradlew ]; then
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleDebug
+      else
+        echo "No gradlew found"
+        exit 1
+      fi
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: StudyLens-APK
-          path: "**/*.apk"
+  - uses: actions/upload-artifact@v4
+    with:
+      name: StudyLens-APK
+      path: "**/*.apk"
 ```
